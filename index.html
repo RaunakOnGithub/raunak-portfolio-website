@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Raufolio · Premium</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind (CDN build for quick drop-in) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+            display: ["Poppins", "DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+          },
+          colors: {
+            base: {
+              50: "#f8fafc",
+              100: "#eef2f7",
+              200: "#e2e8f0",
+              900: "#0b1020",
+            },
+          },
+          boxShadow: {
+            glow: "0 0 0 1px rgba(255,255,255,.08), 0 10px 40px rgba(59,130,246,.15)",
+          },
+          dropShadow: {
+            glow: "0 10px 30px rgba(99,102,241,.35)",
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+
+  <!-- Lenis (buttery smooth scroll) -->
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.41/bundled/lenis.min.js" defer></script>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+
+  <!-- Ambient background helpers (tiny + non-bulky) -->
+  <style>
+    /* Layered radial gradients */
+    .ambient {
+      background-image:
+        radial-gradient(800px 400px at 20% 10%, rgba(56,189,248,.14), transparent 60%),
+        radial-gradient(600px 300px at 80% 18%, rgba(167,139,250,.15), transparent 60%),
+        radial-gradient(900px 500px at 50% 85%, rgba(244,114,182,.10), transparent 70%);
+    }
+    /* SVG turbulence noise as data URL */
+    .noise {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    background-size: 128px 128px;
+  } 
+
+    /* Hide focus ring outline artifacts on icon buttons (we provide visible ring via Tailwind) */
+    .focus-none:focus { outline: none; }
+  </style>
+</head>
+
+<body class="bg-base-900 text-white antialiased selection:bg-white/20">
+  <!-- Ambient BG -->
+  <div aria-hidden class="fixed inset-0 -z-10 ambient opacity-80"></div>
+  <div aria-hidden class="fixed inset-0 -z-10 noise opacity-[.08] mix-blend-overlay pointer-events-none"></div>
+
+  <!-- ===== NAVBAR ===== -->
+  <header class="fixed top-0 left-0 right-0 z-50">
+    <nav class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
+      <div class="rounded-2xl bg-white/5 supports-[backdrop-filter]:bg-white/5 backdrop-blur-xl ring-1 ring-white/10 shadow-glow">
+        <div class="flex items-center justify-between px-4 lg:px-6 py-3">
+          <a href="#home" class="font-display text-lg sm:text-xl font-semibold tracking-tight">CodeWithRaunak</a>
+
+          <div class="hidden lg:flex items-center gap-6 text-sm text-white/70">
+            <a class="navlink hover:text-white transition" href="#home">Home</a>
+            <a class="navlink hover:text-white transition" href="#skills">Skills</a>
+            <a class="navlink hover:text-white transition" href="#about">About</a>
+            <a class="navlink hover:text-white transition" href="#projects">Projects</a>
+            <a class="navlink hover:text-white transition" href="#contact">Contact</a>
+          </div>
+
+          <div class="hidden lg:flex items-center gap-3">
+            <a href="assets/raunak resume.pdf" download class="inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-4 py-2 text-sm font-semibold shadow hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+              <i class="ph ph-read-cv-logo text-lg"></i>
+              <span>Download CV</span>
+            </a>
+          </div>
+
+          <!-- Mobile toggle -->
+          <button id="navToggle" class="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60" aria-label="Open menu">
+            <i class="ph-bold ph-list text-xl"></i>
+          </button>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden border-t border-white/10 px-4 lg:hidden">
+          <div class="grid gap-1 py-3 text-white/80 text-sm">
+            <a class="navlink block rounded-lg px-3 py-2 hover:bg-white/10" href="#home">Home</a>
+            <a class="navlink block rounded-lg px-3 py-2 hover:bg-white/10" href="#skills">Skills</a>
+            <a class="navlink block rounded-lg px-3 py-2 hover:bg-white/10" href="#about">About</a>
+            <a class="navlink block rounded-lg px-3 py-2 hover:bg-white/10" href="#projects">Projects</a>
+            <a class="navlink block rounded-lg px-3 py-2 hover:bg-white/10" href="#contact">Contact</a>
+            <a href="assets/raunak resume.pdf" download class="mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-white text-base-900 px-4 py-2 text-sm font-semibold shadow hover:bg-white/90">
+              <i class="ph ph-read-cv-logo text-lg"></i>
+              <span>Download CV</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
+    <!-- ===== HERO ===== -->
+    <section id="home" class="pt-28 sm:pt-36 lg:pt-44">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div class="space-y-6">
+          <h1 class="font-display text-4xl sm:text-5xl md:text-6xl/none tracking-tight">
+            Hello, I'm <span class="bg-gradient-to-r from-sky-300 via-indigo-300 to-pink-300 bg-clip-text text-transparent">Raunak</span>
+            <i class="ph-bold ph-hand-waving align-middle text-sky-300/90 drop-shadow-glow"></i>
+          </h1>
+          <p class="text-white/80 max-w-prose">
+            Frontend Developer based in Mumbai, building clean, responsive user interfaces with performance in mind.
+            I love crafting delightful interactions, accessible design, and animations that feel <em>buttery</em> smooth.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="#contact" class="inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-5 py-2.5 text-sm font-semibold shadow hover:bg-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70">
+              <i class="ph-bold ph-paper-plane-right text-lg"></i>
+              Contact Info
+            </a>
+            <a href="assets/raunak resume.pdf" download class="inline-flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-5 py-2.5 text-sm font-semibold hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60">
+              <i class="ph ph-read-cv-logo text-lg"></i>
+              Download CV
+            </a>
+          </div>
+          <div class="flex items-center gap-3 pt-2">
+            <a href="https://www.linkedin.com/in/raunakchaurasiya/" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="LinkedIn"><i class="ph-bold ph-linkedin-logo text-xl"></i></a>
+            <a href="https://www.instagram.com/raunak_618?igsh=MTQ0bXp6MXF6b2M3NA==" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="Instagram"><i class="ph-bold ph-instagram-logo text-xl"></i></a>
+            <a href="https://github.com/RaunakOnGithub" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="GitHub"><i class="ph-bold ph-github-logo text-xl"></i></a>
+          </div>
+          <a href="#skills" class="group inline-flex items-center gap-2 text-white/70 hover:text-white transition">
+            Scroll Down <i class="ph-bold ph-arrow-bend-right-down transition-transform group-hover:translate-y-1"></i>
+          </a>
+        </div>
+
+        <div class="relative">
+          <div class="pointer-events-none absolute -inset-2 rounded-[28px] bg-gradient-to-tr from-indigo-400/30 via-sky-400/20 to-pink-400/25 blur-2xl"></div>
+          <img src="assets/image6.jpeg" alt="Raunak portrait" class="relative rounded-[28px] ring-1 ring-white/20 shadow-2xl aspect-[4/5] object-cover" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SKILLS ===== -->
+    <section id="skills" class="py-20 sm:py-24">
+      <div class="text-center mb-10">
+        <h2 class="font-display text-2xl sm:text-3xl font-semibold">My Skills</h2>
+        <div class="mx-auto mt-3 h-1 w-28 bg-white/20 rounded-full"></div>
+      </div>
+
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Card -->
+        <article class="card reveal rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <i class="ph-bold ph-code text-2xl mb-4"></i>
+          <h3 class="font-semibold mb-1">Frontend Development</h3>
+          <p class="text-white/70 text-sm">HTML, CSS, JavaScript, GSAP, Lenis, locomotie js ,Taiwind css ,Responsive Design</p>
+        </article>
+        
+        <article class="card reveal rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <i class="ph-bold ph-device-mobile text-2xl mb-4"></i>
+          <h3 class="font-semibold mb-1">UI / UX Design</h3>
+          <p class="text-white/70 text-sm">Figma, Canva, User Research</p>
+        </article>
+
+        <article class="card reveal rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <i class="ph-bold ph-database text-2xl mb-4"></i>
+          <h3 class="font-semibold mb-1">Backend Basics</h3>
+          <p class="text-white/70 text-sm">Python, Flask, Java, Firebase, RESTful APIs </p>
+        </article>
+
+        <article class="card reveal rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <i class="ph-bold ph-git-branch text-2xl mb-4"></i>
+          <h3 class="font-semibold mb-1">Version Control</h3>
+          <p class="text-white/70 text-sm">Git, GitHub</p>
+        </article>
+
+        <article class="card reveal rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <i class="ph-bold ph-wrench text-2xl mb-4"></i>
+          <h3 class="font-semibold mb-1">Tools & Tech</h3>
+          <p class="text-white/70 text-sm">VS Code, Gemini ai, MS Excel / PPT, Docs, ChatGPT</p>
+        </article>
+
+        <article class="card reveal rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <i class="ph-bold ph-users text-2xl mb-4"></i>
+          <h3 class="font-semibold mb-1">Soft Skills</h3>
+          <p class="text-white/70 text-sm">Problem Solving, Communication ,Leadership , Self‑Motivation, Adaptability</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT ===== -->
+<section id="about" class="py-20 sm:py-24">
+  <div class="text-center mb-10">
+    <h2 class="font-display text-2xl sm:text-3xl font-semibold">About Me</h2>
+    <div class="mx-auto mt-3 h-1 w-28 bg-white/20 rounded-full"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto space-y-8">
+    <!-- Summary -->
+    <div class="space-y-4 text-center">
+      <h3 class="font-semibold text-xl">Frontend Developer & BCA Student</h3>
+      <p class="text-white/80">
+        Final-year Computer Application student and Frontend Developer with hands-on
+        experience in building responsive, user-centric web applications. Proven ability
+        to improve performance and user engagement through impactful internships and
+        a strong project portfolio.
+      </p>
+    </div>
+
+    <!-- Experience & Education -->
+      <!-- Experience -->
+      <div class="rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow reveal">
+        <h3 class="font-semibold text-lg mb-3">Experience</h3>
+        <div class="space-y-4 text-sm text-white/80">
+          <div>
+            <h4 class="font-medium text-white">Google Student Ambassador <span class="text-white/60">| Aug 2025 – Present</span></h4>
+            <p>Conducted 5+ AI workshops for 200+ students, driving 15% increase in Google Gemini adoption. Represented Google as a student leader after a competitive selection process.</p>
+          </div>
+          <div>
+            <h4 class="font-medium text-white">Web Developer Intern, Prodigy InfoTech <span class="text-white/60">| Jul – Aug 2025</span></h4>
+            <p>Improved mobile user engagement by 25% with responsive layouts and interactive components. Built backend scripts with PHP/MySQL, optimizing data retrieval and reducing server load.</p>
+          </div>
+        </div>
+      </div>   
+  </div>
+</section>
+
+
+    <!-- ===== PROJECTS ===== -->
+    <section id="projects" class="py-20 sm:py-24">
+      <div class="text-center mb-10">
+        <h2 class="font-display text-2xl sm:text-3xl font-semibold">My Projects</h2>
+        <div class="mx-auto mt-3 h-1 w-28 bg-white/20 rounded-full"></div>
+      </div>
+
+      <div class="grid gap-8 md:grid-cols-2">
+        <!-- Project card -->
+        <article class="reveal rounded-2xl overflow-hidden bg-white/5 ring-1 ring-white/10 shadow-glow">
+          <div class="relative h-56 overflow-hidden">
+            <img src="assets/img3.jpeg" alt="Tic Tac Toe" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+          </div>
+          <div class="p-6">
+            <h3 class="font-semibold text-lg">Secure Password Generator</h3>
+            <p class="text-white/70 text-sm mt-2">A modern, offline-ready Secure Password Generator built with HTML, CSS, and JavaScript.
+              It generates military-grade passwords with customization options and works as a PWA (Progressive Web App), so you can even install it as an Android APK.</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">HTML</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">Tailwind css</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">JavaScript</span>
+            </div>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <a href="https://secure-pasword-generator.netlify.app/" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-4 py-2 text-sm font-semibold shadow hover:bg-white/90">Live Demo</a>
+              <a href="https://github.com/RaunakOnGithub/secure-password-maker.git" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/15">View Code</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="reveal rounded-2xl overflow-hidden bg-white/5 ring-1 ring-white/10 shadow-glow">
+          <div class="relative h-56 overflow-hidden">
+            <img src="assets/img4.jpeg" alt="Landing page" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+          </div>
+          <div class="p-6">
+            <h3 class="font-semibold text-lg">Kalpana AI </h3>
+            <p class="text-white/70 text-sm mt-2">KalpanaAI is a sleek and powerful AI Image Generator built with HTML, Tailwind CSS, and JavaScript.
+              It allows users to create stunning AI-generated images using prompts, customize settings.
+              </p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">HTML</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs"> Tailwind css</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">JavaScript</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">API</span>
+            </div>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <a href="https://kalpana-ai.netlify.app/" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-4 py-2 text-sm font-semibold shadow hover:bg-white/90">Live Demo</a>
+              <a href="hhttps://github.com/RaunakOnGithub/KalpanaAI.git" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/15">View Code</a>
+            </div>
+          </div>
+        </article>
+        <article class="reveal rounded-2xl overflow-hidden bg-white/5 ring-1 ring-white/10 shadow-glow">
+          <div class="relative h-56 overflow-hidden">
+            <img src="assets/image1.jpeg" alt="Expense Tracker" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+          </div>
+          <div class="p-6">
+            <h3 class="font-semibold text-lg">Expense Tracker Website</h3>
+            <p class="text-white/70 text-sm mt-2">Manage transactions with charts and smooth animations. Built with HTML, CSS, JavaScript and Chart.js.</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">HTML</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">CSS</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">JavaScript</span>
+            </div>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <a href="https://raunakongithub.github.io/Expenses-tracker-/" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-4 py-2 text-sm font-semibold shadow hover:bg-white/90">Live Demo</a>
+              <a href="https://github.com/RaunakOnGithub/Expenses-tracker-" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/15">View Code</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="reveal rounded-2xl overflow-hidden bg-white/5 ring-1 ring-white/10 shadow-glow">
+          <div class="relative h-56 overflow-hidden">
+            <img src="assets/image2.jpeg" alt="Weather App" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+          </div>
+          <div class="p-6">
+            <h3 class="font-semibold text-lg">Responsive Weather Web App</h3>
+            <p class="text-white/70 text-sm mt-2">Real‑time weather using OpenWeather API with a clean, responsive UI.</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">HTML</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">CSS</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">JavaScript</span>
+              <span class="rounded-full bg-white/10 px-3 py-1 text-xs">API</span>
+            </div>
+            <div class="mt-5 flex flex-wrap gap-3">
+              <a href="https://raunakongithub.github.io/PRODIGY_WD_04/" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-4 py-2 text-sm font-semibold shadow hover:bg-white/90">Live Demo</a>
+              <a href="https://github.com/RaunakOnGithub/PRODIGY_WD_04" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/15">View Code</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="py-20 sm:py-24">
+      <div class="text-center mb-10">
+        <h2 class="font-display text-2xl sm:text-3xl font-semibold">Contact Me</h2>
+        <div class="mx-auto mt-3 h-1 w-28 bg-white/20 rounded-full"></div>
+      </div>
+
+      <div class="grid lg:grid-cols-5 gap-8">
+        <div class="lg:col-span-2 space-y-5">
+          <h3 class="font-semibold text-xl">Get In Touch</h3>
+          <p class="text-white/80">Feel free to reach out for questions, collaborations, or just to say hello!</p>
+
+          <div class="flex items-start gap-3">
+            <i class="ph-bold ph-envelope text-xl"></i>
+            <div>
+              <h4 class="font-medium">Email</h4>
+              <p class="text-white/80">raunakchaurasiya8070@gmail.com</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <i class="ph-bold ph-map-pin text-xl"></i>
+            <div>
+              <h4 class="font-medium">Location</h4>
+              <p class="text-white/80">Mumbai, India</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <i class="ph-bold ph-phone text-xl"></i>
+            <div>
+              <h4 class="font-medium">Phone</h4>
+              <p class="text-white/80">+91 8070803790</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <a href="https://www.linkedin.com/in/raunakchaurasiya/" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="LinkedIn"><i class="ph-bold ph-linkedin-logo text-xl"></i></a>
+            <a href="https://www.instagram.com/raunak_618?igsh=MTQ0bXp6MXF6b2M3NA==" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="Instagram"><i class="ph-bold ph-instagram-logo text-xl"></i></a>
+            <a href="https://github.com/RaunakOnGithub" target="_blank" class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="GitHub"><i class="ph-bold ph-github-logo text-xl"></i></a>
+          </div>
+        </div>
+
+        <form id="contactForm" class="lg:col-span-3 rounded-2xl bg-white/5 ring-1 ring-white/10 p-6 shadow-glow">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label for="name" class="block text-sm font-medium mb-1">Your Name</label>
+              <input id="name" name="name" type="text" required class="w-full rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2.5 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/60" placeholder="Enter your name" />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium mb-1">Your Email</label>
+              <input id="email" name="email" type="email" required class="w-full rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2.5 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/60" placeholder="Enter your email" />
+            </div>
+          </div>
+          <div class="mt-4">
+            <label for="subject" class="block text-sm font-medium mb-1">Subject</label>
+            <input id="subject" name="subject" type="text" required class="w-full rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2.5 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/60" placeholder="Enter subject" />
+          </div>
+          <div class="mt-4">
+            <label for="message" class="block text-sm font-medium mb-1">Message</label>
+            <textarea id="message" name="message" rows="6" required class="w-full rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2.5 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/60" placeholder="Enter your message"></textarea>
+          </div>
+          <button type="submit" class="mt-5 inline-flex items-center gap-2 rounded-xl bg-white text-base-900 px-5 py-2.5 text-sm font-semibold shadow hover:bg-white/90">
+            <i class="ph-bold ph-paper-plane-right text-lg"></i> Send Message
+          </button>
+          <p id="formStatus" class="mt-3 text-sm"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="mt-8 border-t border-white/10">
+    <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-10">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div>
+          <a href="#home" class="font-display text-lg font-semibold">CodeWithRaunak</a>
+          <p class="text-white/70 mt-2 max-w-xs">Creating beautiful digital experiences with clean and efficient code.</p>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3">Quick Links</h4>
+          <ul class="space-y-2 text-white/80 text-sm">
+            <li><a class="hover:text-white" href="#home">Home</a></li>
+            <li><a class="hover:text-white" href="#skills">Skills</a></li>
+            <li><a class="hover:text-white" href="#about">About</a></li>
+            <li><a class="hover:text-white" href="#projects">Projects</a></li>
+            <li><a class="hover:text-white" href="#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3">Services</h4>
+          <ul class="space-y-2 text-white/80 text-sm">
+            <li>Web Development</li>
+            <li>UI/UX Design</li>
+            <li>Consulting</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-3">Newsletter</h4>
+          <p class="text-white/70 text-sm">Subscribe to receive updates and news</p>
+          <form class="mt-3 flex gap-2">
+            <input type="email" placeholder="Enter your email" class="flex-1 rounded-xl bg-white/10 ring-1 ring-white/15 px-4 py-2.5 placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/60" required />
+            <button class="rounded-xl bg-white text-base-900 px-4 py-2.5 text-sm font-semibold shadow hover:bg-white/90" type="submit">Subscribe</button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/70">
+        <p>Made with ❤️ by Raunak © 2025 CodeWithRaunak • All Rights Reserved.</p>
+        <div class="flex items-center gap-3">
+          <a href="https://www.linkedin.com/in/raunakchaurasiya/" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="LinkedIn"><i class="ph-bold ph-linkedin-logo text-lg"></i></a>
+          <a href="https://www.instagram.com/raunak_618?igsh=MTQ0bXp6MXF6b2M3NA==" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="Instagram"><i class="ph-bold ph-instagram-logo text-lg"></i></a>
+          <a href="https://github.com/RaunakOnGithub" target="_blank" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15" aria-label="GitHub"><i class="ph-bold ph-github-logo text-lg"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+<script src="script.js"></script>
+</body>
+</html>
